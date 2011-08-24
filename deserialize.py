@@ -9,6 +9,7 @@ import logging
 import socket
 import time
 from util import short_hex, long_hex
+import struct
 
 def parse_CAddress(vds):
   d = {}
