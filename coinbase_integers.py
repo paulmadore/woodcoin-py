@@ -56,12 +56,12 @@ def main():
       return True
     (n,) = struct.unpack_from('<I', scriptSig[0:4])
     if n < 6*24*365.25*100:  # 200 years of blocks:
-      print("%d: %d (%s)"%(height, n, approx_date(n)))
+      print("%d: %d (%s) version: %d/%d"%(height, n, approx_date(n), block_data['b_version'],coinbase['version']))
 
     if ord(scriptSig[0]) == 0x03:
       (n,) = struct.unpack_from('<I', scriptSig[1:4]+'\0')
       if n < 6*24*365.25*100:  # 200 years of blocks:
-        print("%d: PUSH %d (%s)"%(height, n, approx_date(n)))
+        print("%d: PUSH %d (%s) version: %d/%d"%(height, n, approx_date(n), block_data['b_version'],coinbase['version']))
 
     return True
 
