@@ -31,12 +31,12 @@ def _read_CDiskTxPos(stream):
   n_tx_pos = stream.read_uint32()
   return (n_file, n_block_pos, n_tx_pos)
 
-def _dump_block(datadir, nFile, nBlockPos, hash256, hashNext, do_print=True):
+def _dump_block(datadir, nFile, nBlockPos, hash256, hashNext, do_print=True, print_raw_tx=False):
   blockfile = open(os.path.join(datadir, "blk%04d.dat"%(nFile,)), "rb")
   ds = BCDataStream()
   ds.map_file(blockfile, nBlockPos)
   d = parse_Block(ds)
-  block_string = deserialize_Block(d)
+  block_string = deserialize_Block(d, print_raw_tx)
   ds.close_file()
   blockfile.close()
   if do_print:
@@ -64,7 +64,7 @@ def _parse_block_index(vds):
   d['__header__'] = vds.input[header_start:header_end]
   return d
 
-def dump_block(datadir, db_env, block_hash):
+def dump_block(datadir, db_env, block_hash, print_raw_tx=False):
   """ Dump a block, given hexadecimal hash-- either the full hash
       OR a short_hex version of the it.
   """
@@ -90,7 +90,7 @@ def dump_block(datadir, db_env, block_hash):
 
     if (hash_hex.startswith(block_hash) or short_hex(hash256[::-1]).startswith(block_hash)):
       print "Block height: "+str(block_data['nHeight'])
-      _dump_block(datadir, block_data['nFile'], block_data['nBlockPos'], hash256, block_data['hashNext'])
+      _dump_block(datadir, block_data['nFile'], block_data['nBlockPos'], hash256, block_data['hashNext'], print_raw_tx=print_raw_tx)
 
     (key, value) = cursor.next()
 
@@ -131,7 +131,7 @@ def scan_blocks(datadir, db_env, callback_fn):
   return block_data
 
 
-def dump_block_n(datadir, db_env, block_number):
+def dump_block_n(datadir, db_env, block_number, print_raw_tx=False):
   """ Dump a block given block number (== height, genesis block is 0)
   """
   def scan_callback(block_data):
@@ -140,7 +140,7 @@ def dump_block_n(datadir, db_env, block_number):
   block_data = scan_blocks(datadir, db_env, scan_callback)
 
   print "Block height: "+str(block_data['nHeight'])
-  _dump_block(datadir, block_data['nFile'], block_data['nBlockPos'], block_data['hash256'], block_data['hashNext'])
+  _dump_block(datadir, block_data['nFile'], block_data['nBlockPos'], block_data['hash256'], block_data['hashNext'], print_raw_tx=print_raw_tx)
 
 def search_blocks(datadir, db_env, pattern):
   """ Dump a block given block number (== height, genesis block is 0)

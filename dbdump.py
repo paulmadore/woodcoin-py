@@ -38,6 +38,8 @@ def main():
                     help="Dump a single block, given its hex hash (or abbreviated hex hash) OR block height")
   parser.add_option("--search-blocks", action="store", dest="search_blocks", default=None,
                     help="Search the block chain for blocks containing given regex pattern")
+  parser.add_option("--print-raw-tx", action="store_true", dest="print_raw_tx", default=False,
+                    help="When dumping a block, print raw, hexadecimal transaction data for every transaction, in the same format that getmemorypool uses")
   (options, args) = parser.parse_args()
 
   if options.datadir is None:
@@ -74,11 +76,11 @@ def main():
   if options.dump_block is not None:
     if len(options.dump_block) < 7: # Probably an integer...
       try:
-        dump_block_n(db_dir, db_env, int(options.dump_block))
+        dump_block_n(db_dir, db_env, int(options.dump_block), options.print_raw_tx)
       except ValueError:
-        dump_block(db_dir, db_env, options.dump_block)
+        dump_block(db_dir, db_env, options.dump_block, options.print_raw_tx)
     else:
-      dump_block(db_dir, db_env, options.dump_block)
+      dump_block(db_dir, db_env, options.dump_block, options.print_raw_tx)
 
   if options.search_blocks is not None:
     search_blocks(db_dir, db_env, options.search_blocks)
