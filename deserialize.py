@@ -44,6 +44,7 @@ def parse_TxIn(vds):
   d['scriptSig'] = vds.read_bytes(vds.read_compact_size())
   d['sequence'] = vds.read_uint32()
   return d
+
 def deserialize_TxIn(d, transaction_index=None, owner_keys=None):
   if d['prevout_hash'] == "\x00"*32:
     result = "TxIn: COIN GENERATED"
@@ -78,6 +79,7 @@ def deserialize_TxOut(d, owner_keys=None):
 
 def parse_Transaction(vds):
   d = {}
+  start_pos = vds.read_cursor
   d['version'] = vds.read_int32()
   n_vin = vds.read_compact_size()
   d['txIn'] = []
@@ -88,13 +90,18 @@ def parse_Transaction(vds):
   for i in xrange(n_vout):
     d['txOut'].append(parse_TxOut(vds))
   d['lockTime'] = vds.read_uint32()
+  d['__data__'] = vds.input[start_pos:vds.read_cursor]
   return d
-def deserialize_Transaction(d, transaction_index=None, owner_keys=None):
+
+def deserialize_Transaction(d, transaction_index=None, owner_keys=None, print_raw_tx=False):
   result = "%d tx in, %d out\n"%(len(d['txIn']), len(d['txOut']))
   for txIn in d['txIn']:
     result += deserialize_TxIn(txIn, transaction_index) + "\n"
   for txOut in d['txOut']:
     result += deserialize_TxOut(txOut, owner_keys) + "\n"
+  if print_raw_tx == True:
+      result += "Transaction hex value: " + d['__data__'].encode('hex') + "\n"
+  
   return result
 
 def parse_MerkleTx(vds):
@@ -184,14 +191,14 @@ def parse_Block(vds):
 
   return d
   
-def deserialize_Block(d):
+def deserialize_Block(d, print_raw_tx=False):
   result = "Time: "+time.ctime(d['nTime'])+" Nonce: "+str(d['nNonce'])
   result += "\nnBits: 0x"+hex(d['nBits'])
   result += "\nhashMerkleRoot: 0x"+d['hashMerkleRoot'][::-1].encode('hex_codec')
   result += "\nPrevious block: "+d['hashPrev'][::-1].encode('hex_codec')
   result += "\n%d transactions:\n"%len(d['transactions'])
   for t in d['transactions']:
-    result += deserialize_Transaction(t)+"\n"
+    result += deserialize_Transaction(t, print_raw_tx=print_raw_tx)+"\n"
   result += "\nRaw block header: "+d['__header__'].encode('hex_codec')
   return result
 
