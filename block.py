@@ -255,3 +255,22 @@ def check_block_chain(db_env):
       print(" Forward: "+str(forward))
       print(" Back: "+str(back))
     block_data = read_block(cursor, block_data['hashNext'])
+
+class CachedBlockFile(object):
+  def __init__(self, db_dir):
+    self.datastream = None
+    self.file = None
+    self.n = None
+    self.db_dir = db_dir
+
+  def get_stream(self, n):
+    if self.n == n:
+      return self.datastream
+    if self.datastream is not None:
+      self.datastream.close_file()
+      self.file.close()
+    self.n = n
+    self.file = open(os.path.join(self.db_dir, "blk%04d.dat"%(n,)), "rb")
+    self.datastream = BCDataStream()
+    self.datastream.map_file(self.file, 0)
+    return self.datastream

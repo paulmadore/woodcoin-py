@@ -1,3 +1,11 @@
+REQUIREMENTS:
+
+Now that the bitcoin blockchain is more than 2GB big, some of these tools will no longer
+run on 32-bit systems!
+
+Running on a 32-bit system will result in a 'Cannot allocate memory' error when the tools
+try to mmap the second blk000?.dat file.
+
 ----- dbdump.py -----
 Run    dbdump.py --help    for usage.  Database files are opened read-only, but
 you might want to backup your Bitcoin wallet.dat file just in case.
