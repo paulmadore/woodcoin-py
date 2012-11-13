@@ -1,4 +1,15 @@
+NOTE:
+
+These tools are becoming obsolete as we move away from using Berkeley DB in
+Bitcoin-Qt/bitcoind.
+
+If you are looking for a tool to manipulate the wallet.dat file, you might
+want to try https://github.com/joric/pywallet
+
 REQUIREMENTS:
+
+You must run Bitcoin-Qt/bitcoind versions 0.6.0 through 0.7.* with the "-detachdb" option
+or these tools will be unable to read the Berkeley DB files.
 
 Now that the bitcoin blockchain is more than 2GB big, some of these tools will no longer
 run on 32-bit systems!
