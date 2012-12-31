@@ -73,7 +73,7 @@ def hash_160(public_key):
   return h2
 
 def public_key_to_bc_address(public_key, version="\x00"):
-  if not have_crypto:
+  if not have_crypto or public_key is None:
     return ''
   h160 = hash_160(public_key)
   return hash_160_to_bc_address(h160, version=version)
