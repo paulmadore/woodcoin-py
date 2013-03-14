@@ -60,6 +60,10 @@ def main():
                       help="Print block hashes contained in the file")
     parser.add_option("--extract", action="store", dest="extract", default=None,
                       help="Extract block(s) to stdout, given block height or hash")
+    parser.add_option("--chain", action="store", dest="chain", default=None,
+                      help="Extract a single chain, given head hash")
+    parser.add_option("--chainhashes", action="store", dest="chainhashes", default=None,
+                      help="Print a single chain's hashes, given head hash")
     parser.add_option("--testnet", action="store_true", dest="testnet", default=False,
                       help="Parse tesnet3 blk.dat file")
 
@@ -70,6 +74,14 @@ def main():
     else:
         blockdata = sys.stdin.read()
 
+    tiphash = None
+    if options.chain:
+        tiphash = options.chain.decode('hex_codec')[::-1]
+    elif options.chainhashes:
+        tiphash = options.chainhashes.decode('hex_codec')[::-1]
+
+    childparent = { } # childhash -> (parenthash, childdata)
+
     for (rawblock, block) in scan_for_blocks(options.testnet, blockdata):
         # Note: rawblock includes 8-byte msgheader+size
         # block header is bytes 8-88
@@ -79,6 +91,9 @@ def main():
         binaryhash = hashlib.sha256(hashlib.sha256(rawblock[8:88]).digest()).digest()
         hexhash = binaryhash[::-1].encode('hex_codec')
 
+        if tiphash is not None:
+            childparent[binaryhash] = (block['hashPrev'],rawblock)
+
         if options.extract is not None:
             if options.extract == height or options.extract == hexhash:
                 sys.stdout.write(rawblock)
@@ -87,6 +102,21 @@ def main():
         elif options.print_hashes:
             print(hexhash)
 
+    if tiphash is not None:
+        if tiphash not in childparent:
+            print("Tip of chain %s not found"%(options.chain))
+            sys.exit(1)
+        to_dump = [ tiphash ]
+        child = childparent[tiphash][0]
+        while child in childparent:
+            to_dump.insert(0, child)
+            child = childparent[child][0]
+
+        for hash in to_dump:
+            if options.chain:
+                sys.stdout.write(childparent[hash][1])
+            else:
+                print(hash[::-1].encode('hex_codec'))
 
 if __name__ == '__main__':
     main()
