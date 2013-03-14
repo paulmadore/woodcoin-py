@@ -192,15 +192,16 @@ def parse_Block(vds):
 
   return d
   
-def deserialize_Block(d, print_raw_tx=False):
+def deserialize_Block(d, print_tx=False, print_raw_tx=False):
   result = "Time: "+time.ctime(d['nTime'])+" Nonce: "+str(d['nNonce'])
   result += "\nnBits: 0x"+hex(d['nBits'])
   result += "\nhashMerkleRoot: 0x"+d['hashMerkleRoot'][::-1].encode('hex_codec')
   result += "\nPrevious block: "+d['hashPrev'][::-1].encode('hex_codec')
-  result += "\n%d transactions:\n"%len(d['transactions'])
-  for t in d['transactions']:
-    result += deserialize_Transaction(t, print_raw_tx=print_raw_tx)+"\n"
-  result += "\nRaw block header: "+d['__header__'].encode('hex_codec')
+  result += "\n%d transactions\n"%len(d['transactions'])
+  if print_tx:
+    for t in d['transactions']:
+      result += deserialize_Transaction(t, print_raw_tx=print_raw_tx)+"\n"
+  result += "Raw block header: "+d['__header__'].encode('hex_codec')
   return result
 
 def parse_BlockLocator(vds):
