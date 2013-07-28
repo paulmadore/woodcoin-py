@@ -4,7 +4,7 @@ These tools are becoming obsolete as we move away from using Berkeley DB in
 Bitcoin-Qt/bitcoind.
 
 If you are looking for a tool to manipulate the wallet.dat file, you might
-want to try https://github.com/joric/pywallet
+want to try https://github.com/jackjack-jj/pywallet
 
 REQUIREMENTS:
 
