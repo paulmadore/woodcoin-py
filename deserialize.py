@@ -288,27 +288,30 @@ def match_decoded(decoded, to_match):
       return False
   return True
 
-def extract_public_key(bytes):
-  decoded = [ x for x in script_GetOp(bytes) ]
+def extract_public_key(bytes, version='\x00'):
+  try:
+    decoded = [ x for x in script_GetOp(bytes) ]
+  except struct.error:
+    return "(None)"
 
   # non-generated TxIn transactions push a signature
   # (seventy-something bytes) and then their public key
   # (33 or 65 bytes) onto the stack:
   match = [ opcodes.OP_PUSHDATA4, opcodes.OP_PUSHDATA4 ]
   if match_decoded(decoded, match):
-    return public_key_to_bc_address(decoded[1][1])
+    return public_key_to_bc_address(decoded[1][1], version=version)
 
   # The Genesis Block, self-payments, and pay-by-IP-address payments look like:
   # 65 BYTES:... CHECKSIG
   match = [ opcodes.OP_PUSHDATA4, opcodes.OP_CHECKSIG ]
   if match_decoded(decoded, match):
-    return public_key_to_bc_address(decoded[0][1])
+    return public_key_to_bc_address(decoded[0][1], version=version)
 
   # Pay-by-Bitcoin-address TxOuts look like:
   # DUP HASH160 20 BYTES:... EQUALVERIFY CHECKSIG
   match = [ opcodes.OP_DUP, opcodes.OP_HASH160, opcodes.OP_PUSHDATA4, opcodes.OP_EQUALVERIFY, opcodes.OP_CHECKSIG ]
   if match_decoded(decoded, match):
-    return hash_160_to_bc_address(decoded[2][1])
+    return hash_160_to_bc_address(decoded[2][1], version=version)
 
   # BIP11 TxOuts look like one of these:
   # Note that match_decoded is dumb, so OP_1 actually matches OP_1/2/3/etc:
